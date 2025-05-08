@@ -1,3 +1,4 @@
+// src/Transfer.utils.ts
 import { Currency } from '@/helpers';
 import { compareAddresses, isNumber } from '@onbeam/utils';
 import { Address, isAddress } from 'viem';
@@ -51,9 +52,15 @@ const tokensSchema = (currencies: Currencies) =>
 
 const recipientSchema = (userAddress?: Address) =>
   z
-    .custom<Address>(isAddress, {
-      message: 'Please enter a valid recipient address',
-    })
+    .string()
+    .refine(
+      (value) =>
+        // Accept valid Ethereum address or .beam name
+        isAddress(value) || value.endsWith('.beam'),
+      {
+        message: 'Please enter a valid recipient address or .beam name',
+      },
+    )
     .refine((value) => !compareAddresses(value, userAddress), {
       message:
         "Please use a different address, you can't transfer to the same address that you're currently connected with",
@@ -66,6 +73,7 @@ export const transferSchema = (currencies: Currencies, userAddress?: Address) =>
         z.object({
           tokens: tokensSchema(currencies),
           recipient: recipientSchema(userAddress),
+          beamName: z.string(),
         }),
       ),
     })

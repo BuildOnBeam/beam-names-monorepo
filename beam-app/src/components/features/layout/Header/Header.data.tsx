@@ -39,4 +39,9 @@ export const navItems: NavigationItem[] = [
     href: '/activity',
     icon: <ActivityIcon />,
   },
+  {
+    title: 'Names',
+    href: '/names',
+    icon: <ActivityIcon />,
+  },
 ];

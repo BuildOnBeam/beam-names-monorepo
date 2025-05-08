@@ -22,6 +22,7 @@ export const TransferForm = () => {
   const hasHitLimit = fields.length >= TRANSFER_ITEM_LIMIT;
 
   const onSubmit: SubmitHandler<TransferSchema> = ({ transactions }) => {
+    console.log("submitting", transactions);
     useTransferModalStore.setState({
       isModalOpen: true,
       state: TransferModalState.IDLE,
@@ -54,6 +55,7 @@ export const TransferForm = () => {
                   {
                     tokens: [{ currencyAddress: '' as Address }],
                     recipient: '' as Address,
+                    beamName: ''
                   },
                   {
                     focusName: `transactions.${fields.length}.tokens.0.amount`,
