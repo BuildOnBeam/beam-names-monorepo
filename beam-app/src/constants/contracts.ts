@@ -1,0 +1,5 @@
+import { isTestnet } from '@/config/isTestnet';
+
+export const TOKENBEAMER_CONTRACT_ADDRESS = isTestnet
+  ? '0xA9533363aAED9FDC02087128EaeD4810C391A2e0'
+  : '0xf88BA2d0A380615893325c51C23a33cB10C93478';

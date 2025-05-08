@@ -1,0 +1,1 @@
+export { RemoveCurrencyModal } from './RemoveCurrencyModal';

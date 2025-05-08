@@ -1,0 +1,28 @@
+/* When adding libraries that could overwrite our styles, make sure to use css layers: */
+/* https://panda-css.com/docs/overview/faq#how-can-i-prevent-other-libraries-from-overriding-my-styles */
+@layer reset, base, tokens, recipes, utilities;
+
+body {
+  font-family: var(--beam-fonts-main);
+  color: var(--beam-colors-mono-100);
+}
+
+[data-rk][role="dialog"] {
+  pointer-events: auto;
+}
+
+@font-face {
+  font-family: "Suisse Intl";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url("../../node_modules/@onbeam/ui/dist/fonts/SuisseIntl-Regular.otf");
+}
+
+@font-face {
+  font-family: "Suisse Intl";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 500;
+  src: url("../../node_modules/@onbeam/ui/dist/fonts/SuisseIntl-Book.otf");
+}

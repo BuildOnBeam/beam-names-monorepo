@@ -1,0 +1,42 @@
+name: 'Detect build issues & coding standards'
+
+on:
+  pull_request:
+    branches:
+      - main
+      - develop
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    env:
+      NEXT_PUBLIC_IS_TESTNET: ${{ vars.NEXT_PUBLIC_IS_TESTNET }}
+      NEXT_PUBLIC_URL: ${{ vars.NEXT_PUBLIC_URL }}
+      NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID: ${{ vars.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID }}
+      NEXT_PUBLIC_TRANSAK_API_KEY: ${{ vars.NEXT_PUBLIC_TRANSAK_API_KEY }}
+      NEXT_PUBLIC_RESERVOIR_API_URL: ${{ vars.NEXT_PUBLIC_RESERVOIR_API_URL }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Use Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: 📥 dependency installation
+        uses: ./.github/actions/pnpm-install
+
+      # Run the linter and verifies the formatting of a set of files. If any errors are found the process exits with a code of 1.
+      - name: Validate code standards
+        run: pnpm validate:ci
+
+      # Run the build
+      - name: Build the project
+        run: pnpm build

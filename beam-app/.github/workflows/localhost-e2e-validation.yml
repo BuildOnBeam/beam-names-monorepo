@@ -1,0 +1,78 @@
+name: Localhost E2E validation
+
+on:
+  pull_request:
+    branches:
+      - main
+      - develop
+
+env:
+  AWS_REGION: eu-central-1
+  HTML_REPORTS_BUCKET: beam-e2e-test-reports
+
+jobs:
+  end-to-end-testing:
+    timeout-minutes: 30
+    runs-on: ubuntu-latest
+    name: "Run E2E tests"
+
+    env:
+      NEXT_PUBLIC_IS_TESTNET: ${{ vars.NEXT_PUBLIC_IS_TESTNET }}
+      NEXT_PUBLIC_URL: ${{ vars.NEXT_PUBLIC_URL }}
+      NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID: ${{ vars.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID }}
+      NEXT_PUBLIC_TRANSAK_API_KEY: ${{ vars.NEXT_PUBLIC_TRANSAK_API_KEY }}
+      NEXT_PUBLIC_RESERVOIR_API_URL: ${{ vars.NEXT_PUBLIC_RESERVOIR_API_URL }}
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Use Node.js 20
+      uses: actions/setup-node@v4
+      with:
+        node-version: 20
+
+    - name: 📥 dependency installation
+      uses: ./.github/actions/pnpm-install
+
+    - name: Build the project
+      run: pnpm build
+
+    - name: Retrieve playwright version
+      id: playwright-version
+      run: echo "PLAYWRIGHT_VERSION=$(pnpm info @playwright/test version)" >> $GITHUB_ENV
+
+    - name: Cache playwright
+      uses: actions/cache@v3
+      id: playwright-cache
+      with:
+        path: |
+          ~/.cache/ms-playwright
+        key: ${{ runner.os }}-playwright-${{ env.PLAYWRIGHT_VERSION }}
+
+    - name: Install Playwright Browsers
+      run: pnpm playwright install --with-deps chromium
+      if: steps.playwright-cache.outputs.cache-hit != 'true'
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ vars.PLAYWRIGHT_AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.PLAYWRIGHT_AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ env.AWS_REGION }}
+
+    - name: Generate E2E config
+      run: ./generate-e2e-config.sh local
+
+    - name: Run Playwright tests
+      run: pnpm playwright test
+
+    - name: Upload Playwright HTML report to S3
+      if: always()
+      run: |
+        date=$(date '+%Y-%m-%d-%H-%M-%S')
+
+        ./upload-e2e-test-report.sh ${{ env.HTML_REPORTS_BUCKET }} $date
+
+        html_report_url="https://e2e.onbeam.com/$date/index.html"
+
+        echo "### 🎭 [Playwright HTML Report]($html_report_url)" >> $GITHUB_STEP_SUMMARY

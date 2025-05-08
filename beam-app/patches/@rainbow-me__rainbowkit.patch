@@ -1,0 +1,13 @@
+diff --git a/dist/index.js b/dist/index.js
+index 99af3d7bbc46fbafbf17e788628cab625bc2750e..aa68128678f4836b609ef82a6a1bb00d98e5f6cd 100644
+--- a/dist/index.js
++++ b/dist/index.js
+@@ -2737,7 +2737,7 @@ function Dialog({ children, onClose, open, titleId }) {
+       getComputedStyle(window.document.body).overflow !== "hidden"
+     );
+   }, []);
+-  const handleBackdropClick = useCallback6(() => onClose(), [onClose]);
++  const handleBackdropClick = useCallback6((e) => {onClose();e.stopPropagation()}, [onClose]);
+   const themeRootProps = useThemeRootProps();
+   const mobile = isMobile();
+   return /* @__PURE__ */ React23.createElement(React23.Fragment, null, open ? createPortal(
